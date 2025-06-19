@@ -80,4 +80,10 @@ public class XDate {
         String text = XDate.format(date, "dd-MMM-yyyy");
         System.out.println(text); // => 21-Jan-2024
     }
+    public static Date parseFull(String dateTime){
+        return parse(dateTime, PATTERN_FULL);
+    }
+    public static String formatFull(Date dateTime){
+        return format(dateTime, PATTERN_FULL);
+    }
 }

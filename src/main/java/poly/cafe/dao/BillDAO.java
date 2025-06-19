@@ -22,4 +22,5 @@ public interface BillDAO extends CrudDAO<Bill, Long> {
     public Bill findServicingByCardId(Integer cardId);
 
     public void delete(Long id);
+    public int getNextBillId();
 }

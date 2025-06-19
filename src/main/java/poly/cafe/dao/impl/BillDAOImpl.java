@@ -5,6 +5,9 @@
 package poly.cafe.dao.impl;
 
 import static com.sun.source.tree.Tree.Kind.AND;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Date;
 import java.util.List;
 import static javax.swing.text.html.HTML.Tag.SELECT;
@@ -101,6 +104,25 @@ public class BillDAOImpl implements BillDAO {
     @Override
     public void delete(Long id) {
         XJdbc.executeUpdate(deleteSql, id);
+    }
+
+    @Override
+    public int getNextBillId() {
+        String sql = "SELECT MAX(Id) FROM Bills";
+        int nextId = 1;
+        try (
+                Connection con = XJdbc.openConnection(); // hoặc dùng lớp kết nối của bạn
+                 PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery();) {
+            if (rs.next()) {
+                int currentMax = rs.getInt(1);
+                if (!rs.wasNull()) {
+                    nextId = currentMax + 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return nextId;
     }
 }
 

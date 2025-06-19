@@ -33,7 +33,7 @@ public class BillManagerJDialog extends JDialog implements BillController {
         initComponents();
     }
 
-    BillDAO dao = new BillDAOImpl();
+    BillDAOImpl dao = new BillDAOImpl();
     List<Bill> items = List.of(); // phiếu bán hàng
     BillDetailDAO billDetailDao = new BillDetailDAOImpl();
     List<BillDetail> details = List.of(); // chi tiết phiếu bán hàng
@@ -70,7 +70,7 @@ public class BillManagerJDialog extends JDialog implements BillController {
         btnMovePrevious = new javax.swing.JButton();
         btnMoveFirst = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
-        jRadioButton3 = new javax.swing.JRadioButton();
+        rdoServicing = new javax.swing.JRadioButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtId = new javax.swing.JTextField();
@@ -79,10 +79,10 @@ public class BillManagerJDialog extends JDialog implements BillController {
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jRadioButton4 = new javax.swing.JRadioButton();
+        rdoCompleted = new javax.swing.JRadioButton();
         txtCheckin = new javax.swing.JTextField();
         txtCheckout = new javax.swing.JTextField();
-        jRadioButton1 = new javax.swing.JRadioButton();
+        rdoCanceled = new javax.swing.JRadioButton();
         txtUsername = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -250,8 +250,8 @@ public class BillManagerJDialog extends JDialog implements BillController {
 
         btnMoveFirst.setText("|<");
 
-        buttonGroup1.add(jRadioButton3);
-        jRadioButton3.setText("Sevricing");
+        buttonGroup1.add(rdoServicing);
+        rdoServicing.setText("Sevricing");
 
         jLabel2.setText("Mã phiếu");
 
@@ -265,11 +265,11 @@ public class BillManagerJDialog extends JDialog implements BillController {
 
         jLabel7.setText("Trạng thái");
 
-        buttonGroup1.add(jRadioButton4);
-        jRadioButton4.setText("Completed");
+        buttonGroup1.add(rdoCompleted);
+        rdoCompleted.setText("Completed");
 
-        buttonGroup1.add(jRadioButton1);
-        jRadioButton1.setText("Canceled");
+        buttonGroup1.add(rdoCanceled);
+        rdoCanceled.setText("Canceled");
 
         jLabel9.setText("Phiếu chi tiết");
 
@@ -335,11 +335,11 @@ public class BillManagerJDialog extends JDialog implements BillController {
                                     .addComponent(txtCheckin, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel7)
                                     .addGroup(jPanel6Layout.createSequentialGroup()
-                                        .addComponent(jRadioButton3)
+                                        .addComponent(rdoServicing)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jRadioButton4)
+                                        .addComponent(rdoCompleted)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jRadioButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(rdoCanceled, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(41, 41, 41)
                                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, 395, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -378,9 +378,9 @@ public class BillManagerJDialog extends JDialog implements BillController {
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jRadioButton3)
-                    .addComponent(jRadioButton4)
-                    .addComponent(jRadioButton1)
+                    .addComponent(rdoServicing)
+                    .addComponent(rdoCompleted)
+                    .addComponent(rdoCanceled)
                     .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel9)
@@ -535,13 +535,13 @@ public class BillManagerJDialog extends JDialog implements BillController {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton3;
-    private javax.swing.JRadioButton jRadioButton4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JRadioButton rdoCanceled;
+    private javax.swing.JRadioButton rdoCompleted;
+    private javax.swing.JRadioButton rdoServicing;
     private javax.swing.JTabbedPane tabs4;
     private javax.swing.JTable tblBillDetails;
     private javax.swing.JTable tblBills;
@@ -599,17 +599,42 @@ public class BillManagerJDialog extends JDialog implements BillController {
     public void open() {
         this.setLocationRelativeTo(null);
         this.selectTimeRange();
+        this.fillToTable();
         this.clear();
     }
 
     @Override
     public void setForm(Bill entity) {
-        this.fillBillDetails();
+        txtId.setText(String.valueOf(entity.getId()));
+        txtCardNumber.setText(String.valueOf(entity.getCardId()));
+        txtCheckin.setText(entity.getCheckin() == null ? "" : XDate.formatFull(entity.getCheckin()));
+        txtCheckout.setText(entity.getCheckout() == null ? "" : XDate.formatFull(entity.getCheckout()));
+        txtUsername.setText(entity.getUsername());
+        rdoServicing.setSelected(entity.getStatus() == 0);
+        rdoCompleted.setSelected(entity.getStatus() == 1);
+        rdoCanceled.setSelected(entity.getStatus() == 2);
+    }
+
+    public int getStatusFromForm() {
+        if (rdoServicing.isSelected()) {
+            return 0;
+        } else if (rdoCompleted.isSelected()) {
+            return 1;
+        } else {
+            return 2;
+        }
     }
 
     @Override
     public Bill getForm() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Bill entity = new Bill();
+        entity.setId(Long.parseLong(txtId.getText()));
+        entity.setUsername(txtUsername.getText());
+        entity.setCardId(Integer.parseInt(txtCardNumber.getText()));
+        entity.setCheckin(XDate.parseFull(txtCheckin.getText())); //???
+        entity.setCheckout(XDate.parseFull(txtCheckout.getText()));
+        entity.setStatus(getStatusFromForm());
+        return entity;
 
     }
 
@@ -621,6 +646,14 @@ public class BillManagerJDialog extends JDialog implements BillController {
         Date end = XDate.parse(txtEnd.getText(), "MM/dd/yyyy");
         items = dao.findByTimeRange(begin, end);
         items.forEach(item -> {
+            model.addRow(new Object[]{
+                item.getId(),
+                item.getCardId(),
+                item.getCheckin(),
+                item.getCheckout(),
+                item.getStatus(),
+                item.getUsername(),
+                false});
         });
     }
 
@@ -651,20 +684,31 @@ public class BillManagerJDialog extends JDialog implements BillController {
 
     @Override
     public void clear() {
-        txtId.setText("");
-        txtCardNumber.setText("");
-        txtCheckin.setText("");
-        txtCheckout.setText("");
-        txtUsername.setText("");
-        jRadioButton1.setSelected(false);
-        jRadioButton3.setSelected(false);
-        jRadioButton4.setSelected(false);
-        fillBillDetails();
+//        txtId.setText("");
+//        txtCardNumber.setText("");
+//        txtCheckin.setText("");
+//        txtCheckout.setText("");
+//        txtUsername.setText("");
+//        rdoCanceled.setSelected(false);
+//        rdoServicing.setSelected(false);
+//        rdoCompleted.setSelected(false);
+//        fillBillDetails();
+        this.setForm(new Bill());
+        txtId.setText(String.valueOf(dao.getNextBillId()));
+        this.setEditable(false);
     }
 
     @Override
     public void setEditable(boolean editable) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        txtId.setEnabled(!editable);
+        btnCreate.setEnabled(!editable);
+        btnUpdate.setEnabled(editable);
+        btnDelete.setEnabled(editable);
+        int rowCount = tblBillDetails.getRowCount();
+        btnMoveFirst.setEnabled(editable && rowCount > 0);
+        btnMovePrevious.setEnabled(editable && rowCount > 0);
+        btnMoveNext.setEnabled(editable && rowCount > 0);
+        btnMoveLast.setEnabled(editable && rowCount > 0);
     }
 
     @Override
